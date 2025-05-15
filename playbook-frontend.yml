@@ -1,0 +1,49 @@
+- name: Setup Vite Frontend
+  hosts: frontend_server
+  become: yes
+
+  vars:
+    aws_access_key: "••••••••••••••••"
+    aws_secret_key: "••••••••••••••••••••••••••••••••"
+    s3_frontend_bucket: "a11_media_bucket"
+    ec2_dns: "<your-ec2-dns>"
+    s3_media_bucket: "a11_media_bucket.s3.eu-north-1.amazonaws.com"
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - nodejs
+          - npm
+          - awscli
+        state: present
+
+    - name: Create environment file
+      copy:
+        dest: /home/ubuntu/ASAIL-MERN-DEPLOYMENT/frontend/.env
+        content: |
+          VITE_BASE_URL=http://{{ ec2_dns }}:5000/api
+          VITE_MEDIA_BASE_URL=https://a11_media_bucket.s3.eu-north-1.amazonaws.com
+
+    - name: Configure AWS CLI
+      command: aws configure
+      args:
+        chdir: /home/ubuntu
+      register: aws_configure
+      ignore_errors: yes
+
+    - name: Create AWS credentials file
+      copy:
+        dest: /home/ubuntu/.aws/credentials
+        content: |
+          [default]
+          aws_access_key_id={{ aws_access_key }}
+          aws_secret_access_key={{ aws_secret_key }}
+
+    - name: Create AWS config file
+      copy:
+        dest: /home/ubuntu/.aws/config
+        content: |
+          [default]
+          region = eu-north-1
+          output = json
