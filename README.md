@@ -46,12 +46,7 @@ To automate the provisioning and deployment of a blog application:
 
 
 ## **Screenshots**
-- `pm2-backend.png` – Backend running under PM2
-- `mongodb-cluster.png` – MongoDB Atlas cluster
-- `media-upload-success.png` – Successful image upload
-- `s3-frontend.png` – Frontend loaded via S3 URL
-
-You can find these in the `/screenshots` folder.
+You can find in the `/screenshots` folder.
 
 
 
