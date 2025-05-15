@@ -1,0 +1,53 @@
+- name: Setup Node.js Backend
+  hosts: backend_server
+  become: yes
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - nodejs
+          - npm
+          - openssl
+        state: present
+        update_cache: yes
+
+    - name: Create environment file
+      copy:
+        dest: /home/ubuntu/ASAIL-MERN-DEPLOYMENT/backend/.env
+        content: |
+          PORT=5000
+          HOST=0.0.0.0
+          MODE=production
+          
+          # Database configuration
+          MONGODB=mongodb+srv://••••••:••••••••@cluster0.mongodb.net/blog-app
+
+          # JWT Authentication
+          JWT_SECRET={{ lookup('pipe', 'openssl rand -hex 32') }}
+          JWT_EXPIRE=30min
+          JWT_REFRESH={{ lookup('pipe', 'openssl rand -hex 32') }}
+          JWT_REFRESH_EXPIRE=3d
+
+          # AWS S3 Configuration
+          AWS_ACCESS_KEY_ID="••••••••••••••••"
+          AWS_SECRET_ACCESS_KEY="••••••••••••••••••••••••••••••••••"
+          AWS_REGION=eu-north-1
+          S3_BUCKET=a11_media_bucket
+          MEDIA_BASE_URL=a11_media_bucket.s3.eu-north-1.amazonaws.com
+
+          # Misc
+          DEFAULT_PAGINATION=20
+
+    - name: Install npm packages
+      command: npm install
+      args:
+        chdir: /home/ubuntu/ASAIL-MERN-DEPLOYMENT/backend
+
+    - name: Start application with PM2
+      command: pm2 start index.js --name "blog-backend"
+      args:
+        chdir: /home/ubuntu/ASAIL-MERN-DEPLOYMENT/backend
+
+    - name: Save PM2 process list
+      command: pm2 save
